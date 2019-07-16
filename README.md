@@ -1,4 +1,4 @@
-* Using CORS with authentication
+# Using CORS with authentication
 
 In `/etc/hosts`, point domains to localhost
 
@@ -37,13 +37,13 @@ In Apache virtual hosts config file, create VirtualHost directives to point Apac
 
 ```
 
-Make XHR request from foo.com to bar.com.
+Make XHR request from `foo.com` to `bar.com`.
 
 This fails with the following error shown in the browser.
 
 > Access to fetch at 'http://bar.com/test.json' from origin 'http://foo.com' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource. If an opaque response serves your needs, set the request's mode to 'no-cors' to fetch the resource with CORS disabled.
 
-Adding this into the `.htaccess` file in the bar directory causes the request to be successful.
+Adding this into the `.htaccess` file in the `/bar` directory causes the request to be successful.
 
 ```
   <IfModule mod_headers.c>
