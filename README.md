@@ -106,3 +106,6 @@ If you create a new page within the same folder, you will find you can also navi
   Accept-Encoding: gzip, deflate
   Accept-Language: en-GB,en;q=0.9,en-US;q=0.8,la;q=0.7
 ```
+
+![alt text](challenge-pop-up.png)
+## How to clear Authorization header?
