@@ -10,6 +10,7 @@ function fetchTestJson() {
   const url = 'http://bar.com/test.json';
   const options = {
     headers: {
+      'X-BLAH-BLAH': 'this is a custom header',
     }
   };
 

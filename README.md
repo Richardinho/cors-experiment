@@ -50,3 +50,8 @@ Adding this into the `.htaccess` file in the `/bar` directory causes the request
     Header set Access-Control-Allow-Origin "*"
   </IfModule>
 ```
+
+This is what is sometimes called a 'simple request' since it consists of a single request and a response. A non-simple request if a 'preflighted' request and requires a preliminary request to be made to the server to query whether the main request is allowed.
+
+If we add a custom header, `X-BLAH-BLAH` to the request, we will find it will fail as it becomes a Preflighted request and the server needs to return extra headers.
+> Access to fetch at 'http://bar.com/test.json' from origin 'http://foo.com' has been blocked by CORS policy: Request header field x-blah-blah is not allowed by Access-Control-Allow-Headers in preflight response.
