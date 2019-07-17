@@ -7,10 +7,10 @@ function error(error) {
 }
 
 function fetchTestJson() {
-  const url = 'http://bar.com/test.json';
+  const url = 'http://bar.com/private/test.json';
   const options = {
+    credentials: 'include',
     headers: {
-      'X-BLAH-BLAH': 'this is a custom header',
     }
   };
 
