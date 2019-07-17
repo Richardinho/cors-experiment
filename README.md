@@ -62,77 +62,8 @@ When we attempt from the `foo.com` domain to make a request cross-origin to bar.
 
 
 
+We can fix this by making requests bar.com return the Access-Control-Allow-Origin header set to `&ast;`.
 
-
-
-
-
-
-
-
-
-To create this password file: 
-
-```
-  htpasswd -c ~/development/cors-passwords richard
-
-```
-(note to self: password is 'password')
-
-
-Now when you visit the page `http://foo.com`, you will be first asked to enter your username and password before being allowed to proceed to the page.
-
-On subsequent visits, the browser remembers your credentials and you wont have to re-enter these details.
-
-![alt text](challenge-pop-up.png)
-
-
-
-
-
-
-
-
-In Apache virtual hosts config file, create VirtualHost directives to point Apache at foo and bar folders when browser navigates to these domains.
-
-```
-  <VirtualHost *:80>
-      ServerName foo.com
-      DocumentRoot "/Users/richardhunter/development/cors-experiment/foo"
-      ErrorLog "/private/var/log/apache2/foo.com-error_log"
-      CustomLog "/private/var/log/apache2/foo.com-access_log" common
-      <Directory "/Users/richardhunter/development/cors-experiment/foo">
-          Options Indexes FollowSymLinks
-          AllowOverride All
-          Order allow,deny
-          Allow from all
-      </Directory>
-  </VirtualHost>
- 
-  <VirtualHost *:80>
-      ServerName bar.com
-       DocumentRoot "/Users/richardhunter/development/cors-experiment/bar"
-       ErrorLog "/private/var/log/apache2/bar.com-error_log"
-       CustomLog "/private/var/log/apache2/bar.com-access_log" common
-       <Directory "/Users/richardhunter/development/cors-experiment/bar">
-           Options Indexes FollowSymLinks
-           AllowOverride All
-           Order allow,deny
-           Allow from all
-       </Directory>
-  </VirtualHost>
-
-```
-
-Make XHR request from `foo.com` to `bar.com`.
-
-This fails with the following error shown in the browser.
-
-> Access to fetch at 'http://bar.com/test.json' from origin 'http://foo.com' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource. If an opaque response serves your needs, set the request's mode to 'no-cors' to fetch the resource with CORS disabled.
-
-
-We can fix this by making requests bar.com return the Access-Control-Allow-Origin header set to '&ast;'
-.
 
 ```
 <VirtualHost *:80>
