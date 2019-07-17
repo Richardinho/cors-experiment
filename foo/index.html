@@ -1,2 +1,27 @@
 <h1>Hello this is foo</h1>
+<button id="button">click me</button>
+
+
+<script>
+
+  const button = document.querySelector('#button');
+  const url = 'http://bar.com/test.json';
+
+  button.addEventListener('click', () => {
+    fetch(url, {
+      credentials: 'include'
+    }).then(response => {
+      if (response.ok) {
+        return response.json();
+      } else {
+        throw Error('something went wrong');
+      }
+    }).then(json => {
+      alert(JSON.stringify(json));
+    }).catch(error => {
+      console.log('Ther wis ane Error', error);
+    });
+  });
+
+</script>
 

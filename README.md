@@ -19,9 +19,11 @@ At this point I should say that it wasn't the case that I was completely baffled
 
 # Setting up Apache server
 
-## Environment
-I'm running on a Mac and will be using Apache server 2.4, latest Chrome and latest Firefox
+###  Environment
+I'm running on a Mac and will be using Apache server 2.4. 
+Unless otherwise stated, I am testing in Chrome.
 
+## Create a new webpage locally to test on
 
 I started by creating a new domain to run on my local machine.
 In `/etc/hosts`, I mapped this domain to my local loopback address. Now, when I type `foo.com` into my address bar, my computer will go to local host rather than out into the internet for this page.
@@ -46,7 +48,28 @@ Check this works.
 
 ![foo.com page](foo-page.png)
 
-Yup!
+Hooray! 
+
+
+## Using CORS 
+
+Having created a domain, we have to now create another one so that we can make XHR requests to it in order to demonstrate CORS. We go through identical steps to those above except our new domain will be called `bar.com`
+
+
+When we attempt from the `foo.com` domain to make a request cross-origin to bar.com for `test.json` that the request fails and we get the following error in the console:
+
+> Access to fetch at 'http://bar.com/test.json' from origin 'http://foo.com' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource. If an opaque response serves your needs, set the request's mode to 'no-cors' to fetch the resource with CORS disabled.
+
+
+
+
+
+
+
+
+
+
+
 
 To create this password file: 
 
@@ -107,78 +130,89 @@ This fails with the following error shown in the browser.
 
 > Access to fetch at 'http://bar.com/test.json' from origin 'http://foo.com' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource. If an opaque response serves your needs, set the request's mode to 'no-cors' to fetch the resource with CORS disabled.
 
-Adding this into the `.htaccess` file in the `/bar` directory causes the request to be successful.
+
+We can fix this by making requests bar.com return the Access-Control-Allow-Origin header set to '&ast;'
+.
 
 ```
-  <IfModule mod_headers.c>
-    Header set Access-Control-Allow-Origin "*"
-  </IfModule>
+<VirtualHost *:80>
+    ServerName bar.com
+    DocumentRoot "/Users/richardhunter/development/cors-experiment/bar"
+    ErrorLog "/private/var/log/apache2/bar.com-error_log"
+    CustomLog "/private/var/log/apache2/bar.com-access_log" common
+    Header set Access-Control-Allow-Origin "*"  
+</VirtualHost>
 ```
 
-## Preflighted Request
-This is what is sometimes called a 'simple request' since it consists of a single request and a response. A non-simple request if a 'preflighted' request and requires a preliminary request to be made to the server to query whether the main request is allowed.
-
-If we add a custom header, `X-BLAH-BLAH` to the request, we will find it will fail as it becomes a Preflighted request and the server needs to return extra headers.
-
-> Access to fetch at 'http://bar.com/test.json' from origin 'http://foo.com' has been blocked by CORS policy: Request header field x-blah-blah is not allowed by Access-Control-Allow-Headers in preflight response.
-
-So lets fix this.
-
-```
-  <IfModule mod_headers.c>
-    Header set Access-Control-Allow-Origin "*"
-    Header set Access-Control-Allow-Headers "x-blah-blah"
-  </IfModule>
-```
-Adding the header `Access-Control-Allow-Headers` with the value of our custom header allows the preflighted request to succeed.
 
 ## Authentication
 
-Create password file:
+How will this work when `bar.com` is password protected? To find out, lets make it password protected.
 
+
+```
+  <VirtualHost *:80>
+      ServerName bar.com
+      DocumentRoot "/Users/richardhunter/development/cors-experiment/bar"
+      ErrorLog "/private/var/log/apache2/bar.com-error_log"
+      CustomLog "/private/var/log/apache2/bar.com-access_log" common
+      Header set Access-Control-Allow-Origin "*"  
+      <Directory /Users/richardhunter/development/cors-experiment/bar>
+        AuthType Basic
+        AuthName "Restricted Files"
+        AuthBasicProvider file
+        AuthUserFile "/Users/richardhunter/development/cors-passwords"
+        Require user richard
+      </Directory>
+  </VirtualHost>
+```
+`AuthUserFile` references a file containing passwords.
+It is created using the `htpasswd` utility that is installed with Apache:
 ```
   htpasswd -c ~/development/cors-passwords richard
 
-  ### Password
-  username: Richard
-  password: password
-  ####
+```
+The `-c` flag means to create a new file. If we omit that, we will simply add the user to an existing file.
 
-```
-Add the following to `.htaccess` file
-```
-AuthType Basic
-AuthName "Restricted Files"
-AuthBasicProvider file
-AuthUserFile "/Users/richardhunter/development/cors-passwords"
-Require user richard
-```
-
-When navigating to `bar.com/private` you will find a pop up that challenges you to enter a username and a password. On subsequent visits to the page, no challenge is made.
-If you create a new page within the same folder, you will find you can also navigate to it without a challenge.
-
-```
-  GET /private/page-1.html HTTP/1.1
-  Host: bar.com
-  Connection: keep-alive
-  Pragma: no-cache
-  Cache-Control: no-cache
-  Authorization: Basic cmljaGFyZDpwYXNzd29yZA==
-  Upgrade-Insecure-Requests: 1
-  User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36
-  Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3
-  Accept-Encoding: gzip, deflate
-  Accept-Language: en-GB,en;q=0.9,en-US;q=0.8,la;q=0.7
-```
-
-![alt text](challenge-pop-up.png)
-## How to clear Authorization header?
-From the server, there seems to be no way of doing this.
+Once I visit `bar.com`, I find that I am greeted with a pop up asking me to input my username and password.
+![password challenge popup](./password-challenge-popup.png)
 
 
+An interesting observation is that if you refresh the page, or go to a page within the same folder, you aren't rechallenged. The browser remembers your username and password (or your 'credentials'). 
+Forcing the browser to clear these credentials is a bit unclear. Opening and closing the browser(Chrome) doesn't automatically work. Closing the browser then opening in an incognito window seems to work, but I haven't worked out any definite rule.
 
-##  Create a new password
-Run this command to add another user to the password file. Because we are using an existing file rather than creating a new one, we omit the `-c` flag.
+## Cross domain requests requiring authentication
+
+When we attempt to access the json file on bar.com from foo.com, we now find that our request fails. We receive a 401 unauthorised status code
+Curiously we get the same error message in the console as before:
+
+> Access to fetch at 'http://bar.com/test.json' from origin 'http://foo.com' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource. If an opaque response serves your needs, set the request's mode to 'no-cors' to fetch the resource with CORS disabled.
+
+Before, when we didn't return a `Access-Control-Allow-Origin` header, we received a 200 OK response although we didn't receive the data either.
+It seems odd the the browser would show this rather misleading message, but that's what happens. It is things like this that, on top of the patchy documentation, cause a lot of misunderstanding around Cors.
+
+
+The next step is to configure our request to send 'credentials'.
 ```
-  htpasswd ~/development/cors-passwords richy
+  const options = {
+    credentials: 'include',
+  };
+
+  fetch(url, options).then(success, error);
 ```
+
+We also have to edit the response headers a little bit. Firstly changing the `Access-Control-Allow-Origin` header to specifically point to our `foo.com` domain.
+Secondly, adding the `Access-Control-Allow-Credentials` header
+```
+
+    Header set Access-Control-Allow-Origin "http://foo.com"  
+    Header set Access-Control-Allow-Credentials true
+```
+
+Now, everything should work. We should be able to make an Ajax request to `bar.com` from `foo.com` and receive a successful response with data.
+
+## Issues
+In Chrome devtools, only provisional headers are shown, even though the data returns. This issue does not occur in Firefox.
+
+## CORS with images
+There is also a `crossorigin` attribute that can be applied to images. This is primarily for images used with the canvas API. The issues are explained in the [CORS enabled image page on MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/CORS_enabled_image)
