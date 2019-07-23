@@ -1,7 +1,7 @@
 # Creating a Root Certificate
 
 
-##  Step 1: Create a private key
+###  Step 1: Create a private key
 ```
   openssl genrsa -des3 -out myCA.key 2048
 ```
