@@ -1,15 +1,14 @@
-<h1>Hello this is foo</h1>
+<h1>One</h1>
 <button id="button">click me</button>
-
 
 <script>
 
   const button = document.querySelector('#button');
-  const url = 'https://bar.com/test.json';
+  const url = '/private/test.json';
 
   button.addEventListener('click', () => {
     fetch(url, {
-      credentials: 'include'
+
     }).then(response => {
       if (response.ok) {
         return response.json();
@@ -24,4 +23,3 @@
   });
 
 </script>
-
