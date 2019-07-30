@@ -2,8 +2,10 @@
 
 In order to be as realistic as possible, I want to have https enabled on all my sites.
 Since I don't want to have to buy a real certificate, I will self sign my certificates.
-I am going to use the OpenSSL tool for creating certificates. This is the industry standard tool for creating and managing certificates although it isn't the most user friendly piece of software around and the documentation leaves a lot to be desired.
 
+I am going to use the OpenSSL tool for creating certificates. Whilst this is the industry standard tool for creating and managing certificates, it isn't the most user friendly piece of software around. The documentation also leaves a lot to be desired.
+
+I will be using an Apache server running locally on my Macbook Pro.
 
 There are 3 basic steps to create a certificate. First, we have to create a private key, then we create certificate request, and finally we create the certificate itself.
 In practise these can be combined in a single command:
@@ -12,8 +14,8 @@ In practise these can be combined in a single command:
   openssl req -config foo.conf -new -x509 -days 365 -out foo.crt
 ```
 
-
 Here is our configuration file `foo.conf`:
+
 ```
 [ req ]
 default_bits = 2048
@@ -57,12 +59,12 @@ Now we install the certificate on our server
    SSLCertificateKeyFile "/Users/richardhunter/development/cors-experiment/certificates/foo/foo.key"
 </VirtualHost>
 ```
-And restart Apache
-`sudo apachectl restart`
+And restart Apache `sudo apachectl restart`
 
 Now when we navigate to the page in Chrome we get the following message:
 
 ![chrome https error message](chrome-https-error-message.png)
+
 Firefox and Safari show similar messages
 
 What we need to do is tell Macs Keychain that this certificate is allowed:
@@ -75,8 +77,9 @@ sudo security \
     /Users/richardhunter/development/cors-experiment/certificates/foo/foo.crt
 ```
 
-
 And now our page works!
 ![working foo page](working-foo-page.png)
  
+..Or that is to say, it works on Chrome (and on Safari). For some reason, Firefox still doesn't like it.
+We get the same message as before.
 
