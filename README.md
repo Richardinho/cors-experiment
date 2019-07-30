@@ -1,7 +1,6 @@
 # Cors with Authentication and HTTPS
 
-Attempting to access the file `/foo.com/test.json` results in being challenged for a username and password pair on all three browsers. On entering these credentials, the user is granted access in all cases.
-
+The purpose of this project is to perform cross origin requests (using Ajax) using https between sites with Basic authentication enabled.
 ## Setting up HTTPS
 
 In order to be as realistic as possible, I want to have https enabled on all my sites.
