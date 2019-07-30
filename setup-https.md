@@ -8,7 +8,7 @@ I am going to use the OpenSSL tool for creating certificates. This is the indust
 There are 3 basic steps to create a certificate. First, we have to create a private key, then we create certificate request, and finally we create the certificate itself.
 In practise these can be combined in a single command:
 
-``
+```
   openssl req -config foo.conf -new -x509 -days 365 -out foo.crt
 ```
 
